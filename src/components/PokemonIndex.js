@@ -10,7 +10,11 @@ class PokemonPage extends React.Component {
     super(props)
     this.state={
       pokemons:[],
-      search:""
+      search:"",
+      name: '', 
+      hp: '', 
+      front: '', 
+      back: '' 
     }
   }
 
@@ -31,8 +35,43 @@ class PokemonPage extends React.Component {
     })
   }
 
-  addPokemon =(pokemonObj) =>{
-    console.log("hi")
+  onChangeName =(e) =>{
+    this.setState({
+      name: e.target.form.name.value, 
+      hp: e.target.form.hp.value, 
+      front: e.target.form.frontUrl.value, 
+      back: e.target.form.backUrl.value
+    })
+  }
+
+  addPokemon=(e)=>{
+    e.preventDefault()
+    fetch("http://localhost:3000/pokemon", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Accept":"application/json"
+      },
+      body:JSON.stringify({
+        name:this.state.name,
+        stats:[{
+          value:this.state.hp,
+          name:"hp"
+        }],
+        sprites:{
+          front:this.state.front,
+          back:this.state.back
+        }
+      })
+    })
+    .then(res => res.json())
+    .then(newPokemon => {
+      this.setState({
+        pokemons:[...this.state.pokemons, newPokemon]
+      })
+    })
+
+    e.target.reset()
   }
 
   filteredPokemon = () =>{
@@ -44,7 +83,7 @@ class PokemonPage extends React.Component {
       <Container>
         <h1>Pokemon Searcher</h1>
         <br />
-        <PokemonForm addPokemon={this.addPokemon}/>
+        <PokemonForm onChangeName={this.onChangeName} addPokemon={this.addPokemon}/>
         <br />
         <Search onChange={this.onChange}  />
         <br />
